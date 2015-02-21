@@ -63,6 +63,7 @@ app.post("/takememeshot", meme.takememeshot(db));
 //General paths
 app.get("/", routes.index);
 app.get("/photosjson", selfie.photosjson);
+app.get("/photosjson/:location", selfie.photosjson);
 app.get("/photo/:photoid", selfie.photo);
 
 /// catch 404 and forwarding to error handler

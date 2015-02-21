@@ -82,7 +82,7 @@ exports.takememeshot = function(db) {
 };
 
 exports.showfilter = function(req, res) {
-  res.render("filter", { title: "Filter", img: imageURI });
+  res.render("meme", { title: "Filter", img: imageURI });
 };
 
 function saveToS3(reqId, buffer, fileName) {

@@ -33,16 +33,23 @@ module.exports = function(db) {
     collection.find({location: "S"}, function(e, docs){
       if(docs) {
         _(docs).reverse();
-        res.render("photos", { "images": _.take(docs, 20)});
+        res.render("selfies", { "images": _.take(docs, 20)});
       } else {
-        res.render("photos", { "images": []});
+        res.render("selfies", { "images": []});
       }
     });
   };
 
   exports.photosjson = function(req, res) {
+    var urlLocation = req.params.location;
+    var query;
+    if(urlLocation) {
+      query = {location: urlLocation}
+    } else {
+      query = {$or: [{ location: "S" }, { location: "M" }] };
+    }
     var collection = db.get("photocollection");
-    collection.find({}, {}, function(e, docs){
+    collection.find(query, function(e, docs){
       var data = {};
       if(docs) {
         _(docs).reverse();
