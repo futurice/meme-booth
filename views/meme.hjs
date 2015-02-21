@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <title>{{ title }}</title>
-    <link href="/stylesheets/filter.css" rel="stylesheet" />
+    <link href="/stylesheets/meme.css" rel="stylesheet" />
     <!-- Include the Yanone Kaffeesatz font -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,200" rel="stylesheet" />
@@ -30,8 +30,7 @@
                         <a href="#" id="3"></a>
                     </li>
                     <li>
-                        <a href="#" id="4">
-                        </a>
+                        <a href="#" id="4"></a>
                     </li>
                     <li>
                         <a href="#" id="5"></a>
