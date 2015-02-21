@@ -16,7 +16,15 @@ $(function() {
   var interval = Bacon.fromPoll(3000, function () {
     return "tick";
   }).flatMapFirst(function () {
-    return Bacon.fromPromise($.get("/photosjson"));
+    var path = "/photosjson";
+    if($('body').hasClass('selfie')) {
+      console.log('selfie');
+      path = path + "/S";
+    } else if($('body').hasClass('memes')) {
+      console.log('meme');
+      path = path + "/M";
+    }
+    return Bacon.fromPromise($.get(path));
   }).onValue(function (json) {
     var existingImages = getImagesFromDom();
 

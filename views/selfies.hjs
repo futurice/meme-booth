@@ -6,7 +6,7 @@
     <link rel="icon" type="image/png" href="/img/favicon.png" />
     <meta http-equiv="refresh" content="900" />
   </head>
-  <body>
+  <body class="selfie">
     {{#images}}
     <img class="selfie-image"  src="{{ url }}">
     {{/images}}
