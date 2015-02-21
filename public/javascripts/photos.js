@@ -1,8 +1,8 @@
 $(function() {
-  "use strict";
+  'use strict';
 
   function getImagesFromDom() {
-    return _.chain($("img").toArray())
+    return _.chain($('img').toArray())
     .map(function (element) {
       return element.src;
     })
@@ -14,9 +14,17 @@ $(function() {
   }
 
   var interval = Bacon.fromPoll(3000, function () {
-    return "tick";
+    return 'tick';
   }).flatMapFirst(function () {
-    return Bacon.fromPromise($.get("/photosjson"));
+    var path = '/photosjson';
+    if($('body').hasClass('selfie')) {
+      console.log('selfie');
+      path = path + '/S';
+    } else if($('body').hasClass('memes')) {
+      console.log('meme');
+      path = path + '/M';
+    }
+    return Bacon.fromPromise($.get(path));
   }).onValue(function (json) {
     var existingImages = getImagesFromDom();
 
@@ -28,12 +36,12 @@ $(function() {
       });
 
       if (!exists) {
-        $("body").prepend($("<img>").addClass("selfie-image").attr("src", newPic.url));
+        $('body').prepend($('<img>').addClass('selfie-image').attr('src', newPic.url));
       }
     });
 
     // remove when too much.
-    _.chain($("img").toArray())
+    _.chain($('img').toArray())
     .drop(1000)
     .each(function (el) {
       el.parentNode.removeChild(el);

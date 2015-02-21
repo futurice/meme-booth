@@ -11,11 +11,12 @@ $(function() {
   var stwidth = String(baseWidth) + 'px';
   var webcamWidth = baseWidth + 270;
   var webcamHeight = baseHeight;
+  var memeCount = 10;
 
   var AUTO_CANCEL_TIMEOUT = 10000;
 
   // canvas for
-  var firstStepCanvas = document.getElementById("camera-canvas");
+  var firstStepCanvas = document.getElementById('camera-canvas');
   firstStepCanvas.width = baseWidth;
   firstStepCanvas.height = baseHeight;
 
@@ -86,7 +87,7 @@ $(function() {
   }
 
   function process(dataUri, effect) {
-    var canvas = document.createElement("canvas");
+    var canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     var ctx = canvas.getContext('2d');
@@ -122,8 +123,8 @@ $(function() {
   // Filterify
   // return a promise which is resolved with data url of image with filter applied
   function getSource(effect) {
-    var path = "/img/filters/";
-    var filetype = ".png";
+    var path = '/img/filters/';
+    var filetype = '.png';
     return path + effect + filetype;
   }
 
@@ -137,12 +138,12 @@ $(function() {
   }
 
   function showSpinner() {
-    console.log("show spinner");
+    console.log('show spinner');
     $('#spinner').show();
   }
 
   function hideSpinner() {
-    console.log("HIDE spinner");
+    console.log('HIDE spinner');
     $('#spinner').hide();
   }
 
@@ -156,27 +157,22 @@ $(function() {
 
   function setAllFiltersNotActive() {
     console.log('setting default filter active');
-    $('#'+0).addClass('active');
-    $('#'+1).removeClass('active');
-    $('#'+2).removeClass('active');
-    $('#'+3).removeClass('active');
-    $('#'+4).removeClass('active');
-    $('#'+5).removeClass('active');
-    $('#'+6).removeClass('active');
-    $('#'+7).removeClass('active');
-    $('#'+8).removeClass('active');
-    $('#'+9).removeClass('active');
-    $('#'+10).removeClass('active');
-    $('#'+11).removeClass('active');
+    for(var i = 0; i < memeCount; i++) {
+      if(i === 0) {
+        $('#'+i).addClass('active');
+      } else {
+        $('#'+i).removeClass('active');
+      }
+    };
   }
 
   function rightArrowPressed(filterId) {
       var id = filterId + 1;
-      var idMod = mod(10, id);
+      var idMod = mod(memeCount, id);
       $('#'+filterId).removeClass('active');
       $('#'+idMod).addClass('active');
-      if(mod(6,idMod) == 0) {
-        var margin = -1 * 160 * idMod;
+      if(mod(5,idMod) == 0) {
+        var margin = -1 * 154 * idMod;
         $('#first-filter').css( { marginTop : margin });
       }
       return idMod;
@@ -184,15 +180,15 @@ $(function() {
 
   function leftArrowPressed(filterId) {
       var id = filterId - 1;
-      var idMod = mod(10, id);
+      var idMod = mod(memeCount, id);
       console.log(idMod);
       $('#'+filterId).removeClass('active');
       $('#'+idMod).addClass('active');
       var margin;
-      if(idMod === 5) {
+      if(idMod === 4) {
         margin = 0;
-      } else if(idMod === 9) {
-        margin = -970;
+      } else if(idMod === memeCount - 1) {
+        margin = -770;
       }
       console.log(margin);
       if(margin != undefined) {
@@ -211,7 +207,7 @@ $(function() {
       step2Element.hide();
 
       // clear 2nd step image
-      stillElement.attr("src", "");
+      stillElement.attr('src', '');
 
       showSpinner();
       return attachCanvasToVideo(filterId(state), firstStepCanvas, true, false, function() {
@@ -228,13 +224,13 @@ $(function() {
       var rawDataPromise = state.dataUriPromise;
       return rawDataPromise.then(function (dataUri) {
         // view
-        stillElement.attr("src", dataUri);
+        stillElement.attr('src', dataUri);
         hideSpinner();
         firstInfo.hide();
         step2Element.show();
         // save
-        $.post("/takememeshot", { data: dataUri }, function() {
-          console.log('post is ready?');
+        $.post('/takememeshot', { data: dataUri }, function() {
+          console.log('post is ready');
         });
       });
     }
@@ -255,7 +251,7 @@ $(function() {
 
   // events
   var $spaces = $(window).asEventStream('keypress').filter(function (e) {
-    return e.keyCode === 32 || e.keyCode == 0;
+    return e.keyCode === 32 || e.keyCode === 0;
   });
 
   var $enters = $(window).asEventStream('keypress').filter(function (e) {
@@ -283,7 +279,7 @@ $(function() {
       .takeUntil($cancelButton);
   });
 
-  $cancelDataUri.log("cancelDataUri")
+  $cancelDataUri.log('cancelDataUri');
 
   var $cancel = Bacon.mergeAll([$cancelButton, $cancelDataUri]);
 
@@ -298,7 +294,7 @@ $(function() {
     switch (event.type) {
       case 'cancel':
         // cleanup
-        return _.omit(state, "dataUriPromise");
+        return _.omit(state, 'dataUriPromise');
       case 'dataUri':
         // muokkaa kuva
         // lähetä serverille

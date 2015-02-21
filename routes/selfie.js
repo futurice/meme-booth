@@ -1,178 +1,108 @@
-"use strict";
-var PHOTOSDATADIR = require("../env").PHOTOSDATADIR;
+'use strict';
+var PHOTOSDATADIR = require('../env').PHOTOSDATADIR;
+var photoUtil = require('../lib/photo-util');
+var XDate = require('xdate');
+var fs = require('fs');
+var assert = require('assert');
+var _ = require('lodash');
 
-var XDate = require("xdate");
-var request = require("request");
-var fs = require("fs");
-var assert = require("assert");
-var when = require("when");
-var _ = require("lodash");
-var knox = require("knox");
-var env = require("../env");
+module.exports = function(db) {
+  var exports = { };
 
-var client = knox.createClient({
-  key: env.KNOX_KEY,
-  secret: env.KNOX_SECRET,
-  bucket: env.KNOX_BUCKET,
-  region: env.KNOX_REGION
-});
+  // Few safety precaucions
+  assert(fs.statSync(PHOTOSDATADIR).isDirectory());
 
-// Few safety precaucions
-assert(fs.statSync(PHOTOSDATADIR).isDirectory());
+  exports.showselfie = function(req, res){
+    res.render('selfie', { title: 'Snapshot' });
+  };
 
-var imageURI;
-
-exports.showmemes = function(db){
-  return function(req, res) {
-    var collection = db.get("photocollection");
-    collection.find({location: "M"}, function(e, docs){
-      _(docs).reverse();
-      res.render("memes", { "images": _.take(docs, 20)});
+  exports.showphotos = function(req, res) {
+    var collection = db.get('photocollection');
+    collection.find({location: 'S'}, function(e, docs){
+      if(docs) {
+        _(docs).reverse();
+        res.render('selfies', { 'images': _.take(docs, 20)});
+      } else {
+        res.render('selfies', { 'images': []});
+      }
     });
   };
-};
 
-exports.takememeshot = function(db) {
-  return function(req, res) {
-    var reqId = _.uniqueId("meme");
+  // TODO MOVE TO SOME OTHER PLACE
+  exports.photosjson = function(req, res) {
+    var urlLocation = req.params.location;
+    var query;
+    if(urlLocation) {
+      query = {location: urlLocation};
+    } else {
+      query = {$or: [{ location: 'S' }, { location: 'M' }] };
+    }
+    var collection = db.get('photocollection');
+    collection.find(query, function(e, docs){
+      var data = {};
+      if(docs) {
+        _(docs).reverse();
+        data = JSON.stringify(docs);
+        res.writeHead(200, {
+          'Content-Length': data.length,
+          'Content-Type': 'application/json'
+        });
+      }
+      res.send(data);
+    });
+  };
 
+  // TODO MOVE TO SOME OTHER PLACE
+  exports.photo = function (req, res) {
+    var photoId = req.params.photoid || 'foobar';
+    var filename = photoId + '.png';
+    client.getFile(filename, function(err, stream) {
+      if(!err) {
+        stream.pipe(res);
+      } else {
+        console.log('oh snap, error ocurred');
+      }
+    });
+  };
+
+  exports.takesnapshot = function(req, res) {
+    var reqId = _.uniqueId('snap');
+    console.log(reqId, 'Entered takesnapshot');
     try {
-
       var string = req.body.data;
-      //Maybe not the right way to do this?
-      imageURI = string;
       var regex = /^data:.+\/(.+);base64,(.*)$/;
       var matches = string.match(regex);
       var ext = matches[1];
       var data = matches[2];
-      var buffer = new Buffer(data, "base64");
+      var buffer = new Buffer(data, 'base64');
       var now = new XDate();
-      var timeAsISO = now.toISOString().replace(/[:\-]/g, "");
-      var id = "M" + timeAsISO + "-" + _.uniqueId();
-      var fileName = id + "." + ext;
+      var timeAsISO = now.toISOString().replace(/[:\-]/g, '');
+      var id = 'S' + timeAsISO + '-' + _.uniqueId();
+      var fileName = id + '.' + ext;
+      console.log(reqId, 'file name', fileName);
+      console.log(reqId, 'data length', data.length);
 
-      // save file to S3
-      saveToS3(reqId, buffer, fileName)
-        .then(function () {
-          return postToTwitter(reqId, buffer);
-        })
-        .then(function (twitterUrl) {
-          return saveToDB(reqId, db, id, timeAsISO, ext, twitterUrl);
-        })
-        .catch(function (err) {
-          console.error(reqId, "ERROR", err);
-          res.status(500).json({
-            error: "" + err
-          });
-        })
-        .done(function () {
-          res.json({});
-        });
-    } catch (err) {
-      console.error("ERROR", err);
-      res.json(500).json({
-        error: "" + err
+      photoUtil.saveImageToS3(reqId, buffer, fileName)
+      .then(function () {
+        return photoUtil.postToTwitter(reqId, buffer, 'S');
+      })
+      .then(function (urlToTwitter) {
+        console.log(reqId, 'twitter responded with url', urlToTwitter);
+        return photoUtil.saveToDB(reqId, db, id, timeAsISO, ext, urlToTwitter, 'S');
+      })
+      .catch(function (error) {
+        console.error(reqId, 'Saving failed big time', error);
+        res.status(500).json({ error: error });
+      })
+      .done(function(){
+        res.json({ });
       });
+    } catch (err) {
+      console.error(reqId, 'ERROR', err);
+      res.status(500).json({ error: '' + err });
     }
   };
+  return exports;
 };
 
-exports.showfilter = function(req, res) {
-  res.render("filter", { title: "Filter", img: imageURI });
-};
 
-function saveToS3(reqId, buffer, fileName) {
-  var deferred = when.defer();
-
-  var headers = {"Content-Type": "text/plain"};
-  client.putBuffer(buffer, "/" + fileName, headers, function(err, res) {
-       var status = res.statusCode;
-
-       console.log("in put: " + status);
-
-       if (err) {
-         console.error(reqId, "Error saving to S3", err);
-         deferred.reject(err);
-         return;
-       }
-
-       if (200 !== res.statusCode) {
-      deferred.reject(new Error("Status code 200 != " + status));
-    }
-
-    deferred.resolve("saved");
-  });
-
-  return deferred.promise;
-}
-
-function postToTwitter(reqId, buffer) {
-  var deferred = when.defer();
-  var now = new XDate();
-  console.log("tweet");
-  var r = request.post({
-    url: "https://api.twitter.com/1.1/statuses/update_with_media.json",
-    // snapshotNowMeme
-    oauth: {
-      "consumer_key": env.TWITTER_CONSUMER_KEY,
-      "consumer_secret": env.TWITTER_CONSUMER_SECRET,
-      "token": env.TWITTER_TOKEN,
-      "token_secret": env.TWITTER_TOKEN_SECRET
-    }
-  }, function(err, response, body) {
-      if (!err && response && response.statusCode === 200) {
-          console.log("tweeted");
-      deferred.resolve(body);
-      } else {
-          console.log("tweet failed, err " + err);
-          if (env.TWITTER_CONSUMER_KEY === "") {
-        deferred.resolve(body);
-          } else {
-        deferred.reject(err);
-      }
-    }
-  });
-
-  var status = "New Meme: " + now.toString("d.M.yyyy HH:mm:ss");
-  var form = r.form();
-  form.append("status", status);
-  form.append("media[]", buffer);
-
-  return deferred.promise
-    .then(JSON.parse)
-    .then(function (json) {
-      if (env.TWITTER_CONSUMER_KEY !== "") {
-        return json.entities.media[0].expanded_url;
-      } else {
-        return "Twitter is not defined";
-      }
-    });
-}
-
-function saveToDB(reqId, db, id, timeAsISO, ext, twitterUrl) {
-  var deferred = when.defer();
-  // Save to db only if post to twitter succeeded
-  console.log(reqId, "going to save to db");
-  var collection = db.get("photocollection");
-  collection.insert({
-    id: id,
-    location: "M",
-    url: "/photo/" + id,
-    twitter_url: twitterUrl,
-    time: timeAsISO,
-    timestamp: new Date(),
-    extension: ext,
-    deleted: false
-  }, function(err, saved) {
-    console.log(reqId, "saved to db", err + "/" + JSON.stringify(saved));
-    if (err || !saved) {
-      console.error(reqId, "Photo not saved", err, saved);
-      deferred.reject(err || new Error("photo not saved"));
-    } else {
-      console.log(reqId, "Photo saved" + id);
-      deferred.resolve(saved);
-    }
-  });
-
-  return deferred.promise;
-}
