@@ -81,7 +81,7 @@ console.log("taking picture");
     console.log("callback called!!");
     console.log(canvas);
     console.log(canvas.toDataURL());
-    $.post("/takesnapshot", { data: canvas.toDataURL() });
+    $.post("/takeselfieshot", { data: canvas.toDataURL() });
   });
   // console.log("processed is: " + processedDataUri);
   showShutterAnimation();
