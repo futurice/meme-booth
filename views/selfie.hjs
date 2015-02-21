@@ -9,15 +9,15 @@
   </head>
   <body>
     <div id="container">
-      <div id="my-camera">   
+      <div id="my-camera">
         <div id="my-picture"></div>
       </div>
     <div>
   </body>
 
   <!-- Libraries -->
-  <script type="text/javascript" src="/javascripts/jquery-2.1.0.js"></script>
-  <script type="text/javascript" src="/javascripts/webcam.js"></script> 
+  <script type="text/javascript" src="/libraries/jquery-2.1.0.js"></script>
+  <script type="text/javascript" src="/libraries/webcam.js"></script>
   <script type="text/javascript" src="/jquery.shutter/jquery.shutter.js"></script>
   <script src="/javascripts/reloader.js"></script>
   <script src="/javascripts/selfie_front.js"></script>

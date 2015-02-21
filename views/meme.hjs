@@ -77,13 +77,13 @@
 </body>
 
     <!-- Libraries -->
-    <script type="text/javascript" src="/javascripts/jquery-2.1.0.js"></script>
-    <script type="text/javascript" src="/javascripts/bacon.js"></script>
-    <script type="text/javascript" src="/javascripts/lodash.js"></script>
-    <script type="text/javascript" src="/javascripts/q.js"></script>
-    <script type="text/javascript" src="/javascripts/webcam.js"></script>
-    <script type="text/javascript" src="/javascripts/caman.full.js"></script>
-    <script type="text/javascript" src="/javascripts/jquery.mousewheel.min.js"></script>
+    <script type="text/javascript" src="/libraries/jquery-2.1.0.js"></script>
+    <script type="text/javascript" src="/libraries/bacon.js"></script>
+    <script type="text/javascript" src="/libraries/lodash.js"></script>
+    <script type="text/javascript" src="/libraries/q.js"></script>
+    <script type="text/javascript" src="/libraries/webcam.js"></script>
+    <script type="text/javascript" src="/libraries/caman.full.js"></script>
+    <script type="text/javascript" src="/libraries/jquery.mousewheel.min.js"></script>
     <script type="text/javascript" src="/javascripts/filter.js"></script>
     <script src="/javascripts/reloader.js"></script>
 
