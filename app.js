@@ -29,7 +29,8 @@ var bodyParser = require("body-parser");
 
 var routes = require("./routes");
 var selfie = require("./routes/selfie")(db);
-var meme = require("./routes/meme");
+var meme = require("./routes/meme")(db);
+var api = require("./routes/api")(db);
 
 var app = express();
 app.use(auth.connect(basic));
@@ -56,15 +57,15 @@ app.get("/selfies", selfie.showphotos);
 app.post("/takeselfieshot", selfie.takesnapshot);
 
 //Take meme
-app.get("/meme", meme.showfilter);
-app.get("/memes", meme.showmemes(db));
-app.post("/takememeshot", meme.takememeshot(db));
+app.get("/meme", meme.showmeme);
+app.get("/memes", meme.showmemes);
+app.post("/takememeshot", meme.takememeshot);
 
 //General paths
 app.get("/", routes.index);
-app.get("/photosjson", selfie.photosjson);
-app.get("/photosjson/:location", selfie.photosjson);
-app.get("/photo/:photoid", selfie.photo);
+app.get("/photosjson", api.photosjson);
+app.get("/photosjson/:location", api.photosjson);
+app.get("/photo/:photoid", api.photo);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {

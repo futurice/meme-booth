@@ -1,29 +1,24 @@
 'use strict';
 var PHOTOSDATADIR = require('../env').PHOTOSDATADIR;
-
+var photoUtil = require('../lib/photo-util');
 var XDate = require('xdate');
-var request = require('request');
 var fs = require('fs');
 var assert = require('assert');
-var when = require('when');
 var _ = require('lodash');
-var knox = require('knox');
-var env = require('../env');
 
-var client = knox.createClient({
-  key: env.KNOX_KEY,
-  secret: env.KNOX_SECRET,
-  bucket: env.KNOX_BUCKET,
-  region: env.KNOX_REGION
-});
+module.exports = function(db) {
+  var exports = { };
 
-// Few safety precaucions
-assert(fs.statSync(PHOTOSDATADIR).isDirectory());
+  // Few safety precaucions
+  assert(fs.statSync(PHOTOSDATADIR).isDirectory());
 
-var imageURI;
+  var imageURI;
 
-exports.showmemes = function(db){
-  return function(req, res) {
+  exports.showmeme = function(req, res) {
+    res.render('meme', { title: 'Filter', img: imageURI });
+  };
+
+  exports.showmemes = function(req, res) {
     var collection = db.get('photocollection');
     collection.find({location: 'M'}, function(e, docs){
       if(docs) {
@@ -34,12 +29,9 @@ exports.showmemes = function(db){
       }
     });
   };
-};
 
-exports.takememeshot = function(db) {
-  return function(req, res) {
+  exports.takememeshot = function(req, res) {
     var reqId = _.uniqueId('meme');
-
     try {
       var string = req.body.data;
       //Maybe not the right way to do this?
@@ -55,12 +47,12 @@ exports.takememeshot = function(db) {
       var fileName = id + '.' + ext;
 
       // save file to S3
-      saveToS3(reqId, buffer, fileName)
+      photoUtil.saveImageToS3(reqId, buffer, fileName)
         .then(function () {
-          return postToTwitter(reqId, buffer);
+          return photoUtil.postToTwitter(reqId, buffer, 'M');
         })
         .then(function (twitterUrl) {
-          return saveToDB(reqId, db, id, timeAsISO, ext, twitterUrl);
+          return photoUtil.saveToDB(reqId, db, id, timeAsISO, ext, twitterUrl, 'M');
         })
         .catch(function (err) {
           console.error(reqId, 'ERROR', err);
@@ -78,94 +70,5 @@ exports.takememeshot = function(db) {
       });
     }
   };
+  return exports;
 };
-
-exports.showfilter = function(req, res) {
-  res.render('meme', { title: 'Filter', img: imageURI });
-};
-
-function saveToS3(reqId, buffer, fileName) {
-  var deferred = when.defer();
-  var headers = {'Content-Type': 'text/plain'};
-  client.putBuffer(buffer, '/' + fileName, headers, function(err, res) {
-       var status = res.statusCode;
-       if (err) {
-         console.error(reqId, 'Error saving to S3', err);
-         deferred.reject(err);
-         return;
-       }
-       if (200 !== res.statusCode) {
-        deferred.reject(new Error('Status code 200 != ' + status));
-      }
-    deferred.resolve('saved');
-  });
-  return deferred.promise;
-}
-
-function postToTwitter(reqId, buffer) {
-  var deferred = when.defer();
-  var now = new XDate();
-  console.log('tweet');
-  var r = request.post({
-    url: 'https://api.twitter.com/1.1/statuses/update_with_media.json',
-    oauth: {
-      'consumer_key': env.TWITTER_CONSUMER_KEY,
-      'consumer_secret': env.TWITTER_CONSUMER_SECRET,
-      'token': env.TWITTER_TOKEN,
-      'token_secret': env.TWITTER_TOKEN_SECRET
-    }
-  }, function(err, response, body) {
-      if (!err && response && response.statusCode === 200) {
-          console.log('tweeted');
-      deferred.resolve(body);
-      } else {
-          console.log('tweet failed, err ' + err);
-          if (env.TWITTER_CONSUMER_KEY === '') {
-            deferred.resolve(body);
-          } else {
-        deferred.reject(err);
-      }
-    }
-  });
-
-  var status = 'New Meme: ' + now.toString('d.M.yyyy HH:mm:ss');
-  var form = r.form();
-  form.append('status', status);
-  form.append('media[]', buffer);
-
-  return deferred.promise
-    .then(JSON.parse)
-    .then(function (json) {
-      if (env.TWITTER_CONSUMER_KEY !== '') {
-        return json.entities.media[0].expanded_url;
-      } else {
-        return 'Twitter is not defined';
-      }
-    });
-}
-
-function saveToDB(reqId, db, id, timeAsISO, ext, twitterUrl) {
-  var deferred = when.defer();
-  console.log(reqId, 'going to save to db');
-  var collection = db.get('photocollection');
-  collection.insert({
-    id: id,
-    location: 'M',
-    url: '/photo/' + id,
-    twitter_url: twitterUrl,
-    time: timeAsISO,
-    timestamp: new Date(),
-    extension: ext,
-    deleted: false
-  }, function(err, saved) {
-    console.log(reqId, 'saved to db', err + '/' + JSON.stringify(saved));
-    if (err || !saved) {
-      console.error(reqId, 'Photo not saved', err, saved);
-      deferred.reject(err || new Error('photo not saved'));
-    } else {
-      console.log(reqId, 'Photo saved' + id);
-      deferred.resolve(saved);
-    }
-  });
-  return deferred.promise;
-}
