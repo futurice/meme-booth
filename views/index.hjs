@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Monitor</title>
+    <title>MemeBooth</title>
   </head>
   <body>
-    ok
+    <h1>Welcome to MemeBooth</h1>
+    <p>Find us on <a href="https://github.com/futurice/meme-booth">github</a> or start <a href="/selfie">here</a>.</p>
   </body>
 </html>
