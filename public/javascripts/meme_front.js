@@ -16,7 +16,7 @@ $(function() {
   var AUTO_CANCEL_TIMEOUT = 10000;
 
   // canvas for
-  var firstStepCanvas = document.getElementById("camera-canvas");
+  var firstStepCanvas = document.getElementById('camera-canvas');
   firstStepCanvas.width = baseWidth;
   firstStepCanvas.height = baseHeight;
 
@@ -87,7 +87,7 @@ $(function() {
   }
 
   function process(dataUri, effect) {
-    var canvas = document.createElement("canvas");
+    var canvas = document.createElement('canvas');
     canvas.width = width;
     canvas.height = height;
     var ctx = canvas.getContext('2d');
@@ -123,8 +123,8 @@ $(function() {
   // Filterify
   // return a promise which is resolved with data url of image with filter applied
   function getSource(effect) {
-    var path = "/img/filters/";
-    var filetype = ".png";
+    var path = '/img/filters/';
+    var filetype = '.png';
     return path + effect + filetype;
   }
 
@@ -138,12 +138,12 @@ $(function() {
   }
 
   function showSpinner() {
-    console.log("show spinner");
+    console.log('show spinner');
     $('#spinner').show();
   }
 
   function hideSpinner() {
-    console.log("HIDE spinner");
+    console.log('HIDE spinner');
     $('#spinner').hide();
   }
 
@@ -207,7 +207,7 @@ $(function() {
       step2Element.hide();
 
       // clear 2nd step image
-      stillElement.attr("src", "");
+      stillElement.attr('src', '');
 
       showSpinner();
       return attachCanvasToVideo(filterId(state), firstStepCanvas, true, false, function() {
@@ -224,13 +224,13 @@ $(function() {
       var rawDataPromise = state.dataUriPromise;
       return rawDataPromise.then(function (dataUri) {
         // view
-        stillElement.attr("src", dataUri);
+        stillElement.attr('src', dataUri);
         hideSpinner();
         firstInfo.hide();
         step2Element.show();
         // save
-        $.post("/takememeshot", { data: dataUri }, function() {
-          console.log('post is ready?');
+        $.post('/takememeshot', { data: dataUri }, function() {
+          console.log('post is ready');
         });
       });
     }
@@ -251,7 +251,7 @@ $(function() {
 
   // events
   var $spaces = $(window).asEventStream('keypress').filter(function (e) {
-    return e.keyCode === 32 || e.keyCode == 0;
+    return e.keyCode === 32 || e.keyCode === 0;
   });
 
   var $enters = $(window).asEventStream('keypress').filter(function (e) {
@@ -279,7 +279,7 @@ $(function() {
       .takeUntil($cancelButton);
   });
 
-  $cancelDataUri.log("cancelDataUri")
+  $cancelDataUri.log('cancelDataUri');
 
   var $cancel = Bacon.mergeAll([$cancelButton, $cancelDataUri]);
 
@@ -294,7 +294,7 @@ $(function() {
     switch (event.type) {
       case 'cancel':
         // cleanup
-        return _.omit(state, "dataUriPromise");
+        return _.omit(state, 'dataUriPromise');
       case 'dataUri':
         // muokkaa kuva
         // lähetä serverille
