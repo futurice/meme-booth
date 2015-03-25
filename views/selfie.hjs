@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <link rel='stylesheet' href='/stylesheets/selfie.css' />
+    <link rel="stylesheet" type="text/css" href="/jquery.shutter/jquery.shutter.css" />
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+  </head>
+  <body>
+    <div id="container">
+      <div id="my-camera">
+        <div id="my-picture"></div>
+      </div>
+    <div>
+  </body>
+
+  <!-- Libraries -->
+  <script type="text/javascript" src="/libraries/jquery-2.1.0.js"></script>
+  <script type="text/javascript" src="/libraries/webcam.js"></script>
+  <script type="text/javascript" src="/jquery.shutter/jquery.shutter.js"></script>
+  <script src="/javascripts/reloader.js"></script>
+  <script src="/javascripts/selfie_front.js"></script>
+</html>

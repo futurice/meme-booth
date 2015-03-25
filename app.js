@@ -1,9 +1,8 @@
 'use strict';
-var _ = require('lodash');
 
+var _ = require('lodash');
 var express = require('express');
 var path = require('path');
-
 var env = require('./env.js');
 _.each(env, function (value, key) {
   console.info('env ' + key + ': ' + value);
@@ -28,9 +27,9 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 var routes = require('./routes');
-var photos = require('./routes/photo')(db);
-var selfie = require('./routes/selfie');
-// var monitor = require('./routes/monitor');
+var selfie = require('./routes/selfie')(db);
+var meme = require('./routes/meme')(db);
+var api = require('./routes/api')(db);
 
 var app = express();
 app.use(auth.connect(basic));
@@ -51,15 +50,21 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(app.router);
 
-app.get('/', routes.index);
+//Take selfie
+app.get('/selfie', selfie.showselfie);
+app.get('/selfies', selfie.showphotos);
+app.post('/takeselfieshot', selfie.takesnapshot);
 
-app.get('/photos', photos.showphotos);
-app.get('/photosjson', photos.photosjson);
-app.get('/photo/:photoid', photos.photo);
-app.post('/takesnapshot', photos.takesnapshot);
-app.post('/takememeshot', selfie.takememeshot(db));
-app.get('/filter', selfie.showfilter);
-app.get('/memes', selfie.showmemes(db));
+//Take meme
+app.get('/meme', meme.showmeme);
+app.get('/memes', meme.showmemes);
+app.post('/takememeshot', meme.takememeshot);
+
+//General paths
+app.get('/', routes.index);
+app.get('/photosjson', api.photosjson);
+app.get('/photosjson/:location', api.photosjson);
+app.get('/photo/:photoid', api.photo);
 
 /// catch 404 and forwarding to error handler
 app.use(function(req, res, next) {

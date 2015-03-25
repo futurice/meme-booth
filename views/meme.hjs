@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <title>{{ title }}</title>
-    <link href="/stylesheets/filter.css" rel="stylesheet" />
+    <link href="/stylesheets/meme.css" rel="stylesheet" />
     <!-- Include the Yanone Kaffeesatz font -->
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,200" rel="stylesheet" />
@@ -30,8 +30,7 @@
                         <a href="#" id="3"></a>
                     </li>
                     <li>
-                        <a href="#" id="4">
-                        </a>
+                        <a href="#" id="4"></a>
                     </li>
                     <li>
                         <a href="#" id="5"></a>
@@ -77,14 +76,14 @@
 </body>
 
     <!-- Libraries -->
-    <script type="text/javascript" src="/javascripts/jquery-2.1.0.js"></script>
-    <script type="text/javascript" src="/javascripts/bacon.js"></script>
-    <script type="text/javascript" src="/javascripts/lodash.js"></script>
-    <script type="text/javascript" src="/javascripts/q.js"></script>
-    <script type="text/javascript" src="/javascripts/webcam.js"></script>
-    <script type="text/javascript" src="/javascripts/caman.full.js"></script>
-    <script type="text/javascript" src="/javascripts/jquery.mousewheel.min.js"></script>
-    <script type="text/javascript" src="/javascripts/filter.js"></script>
+    <script type="text/javascript" src="/libraries/jquery-2.1.0.js"></script>
+    <script type="text/javascript" src="/libraries/bacon.js"></script>
+    <script type="text/javascript" src="/libraries/lodash.js"></script>
+    <script type="text/javascript" src="/libraries/q.js"></script>
+    <script type="text/javascript" src="/libraries/webcam.js"></script>
+    <script type="text/javascript" src="/libraries/caman.full.js"></script>
+    <script type="text/javascript" src="/libraries/jquery.mousewheel.min.js"></script>
+    <script type="text/javascript" src="/javascripts/meme_front.js"></script>
     <script src="/javascripts/reloader.js"></script>
 
 </html>
